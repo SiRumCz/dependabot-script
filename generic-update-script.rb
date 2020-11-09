@@ -8,6 +8,7 @@ require "dependabot/file_updaters"
 require "dependabot/pull_request_creator"
 require "dependabot/omnibus"
 require "gitlab"
+require_relative "vulnerability_fetcher"
 
 credentials = [
   {
@@ -20,6 +21,7 @@ credentials = [
 
 # Full name of the repo you want to create pull requests for.
 repo_name = ENV["PROJECT_PATH"] # namespace/project
+branch_name = ENV["PROJECT_BRANCH"] || nil # repo branch
 
 # Directory where the base dependency files are.
 directory = ENV["DIRECTORY_PATH"] || "/"
@@ -56,7 +58,7 @@ if ENV["GITHUB_ENTERPRISE_ACCESS_TOKEN"]
     api_endpoint: "https://#{ENV['GITHUB_ENTERPRISE_HOSTNAME']}/api/v3/",
     repo: repo_name,
     directory: directory,
-    branch: nil,
+    branch: branch_name,
   )
 elsif ENV["GITLAB_ACCESS_TOKEN"]
   gitlab_hostname = ENV["GITLAB_HOSTNAME"] || "gitlab.com"
@@ -74,7 +76,7 @@ elsif ENV["GITLAB_ACCESS_TOKEN"]
     api_endpoint: "https://#{gitlab_hostname}/api/v4",
     repo: repo_name,
     directory: directory,
-    branch: nil,
+    branch: branch_name,
   )
 elsif ENV["AZURE_ACCESS_TOKEN"]
   azure_hostname = ENV["AZURE_HOSTNAME"] || "dev.azure.com"
@@ -92,14 +94,14 @@ elsif ENV["AZURE_ACCESS_TOKEN"]
     api_endpoint: "https://#{azure_hostname}/",
     repo: repo_name,
     directory: directory,
-    branch: nil,
+    branch: branch_name,
   )
 else
   source = Dependabot::Source.new(
     provider: "github",
     repo: repo_name,
     directory: directory,
-    branch: nil,
+    branch: branch_name,
   )
 end
 
