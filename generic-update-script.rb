@@ -129,7 +129,29 @@ parser = Dependabot::FileParsers.for_package_manager(package_manager).new(
 
 dependencies = parser.parse
 
-dependencies.select(&:top_level?).each do |dep|
+##################################################
+# Get the security advisories for the dependency #
+##################################################
+
+vulnerabilities = VulnerabilityFetcher.new(dependencies.map(&:name), package_manager, ENV["GITHUB_ACCESS_TOKEN"]).fetch_advisories
+
+dependencies.select { |dep| not dep.top_level? }.each do |dep|
+  security_vulnerabilities = []
+  if vulnerabilities.any?
+    security_vulnerabilities = vulnerabilities[dep.name.to_sym].map do |vuln|
+      vulnerable_versions = vuln[:vulnerable_versions].map { |v| Dependabot::Utils.requirement_class_for_package_manager(package_manager).new(v) }
+      safe_versions = vuln[:patched_versions].map { |v| Dependabot::Utils.requirement_class_for_package_manager(package_manager).new(v) }
+      Dependabot::SecurityAdvisory.new(
+        dependency_name: dep.name,
+        package_manager: package_manager,
+        # cve_id: vuln[:cve_id],
+        # url: vuln[:url],
+        # summary: vuln[:summary],
+        vulnerable_versions: vulnerable_versions,
+        safe_versions: safe_versions
+      )
+    end
+  end
   #########################################
   # Get update details for the dependency #
   #########################################
@@ -137,6 +159,7 @@ dependencies.select(&:top_level?).each do |dep|
     dependency: dep,
     dependency_files: files,
     credentials: credentials,
+    security_advisories: security_vulnerabilities
   )
 
   next if checker.up_to_date?
