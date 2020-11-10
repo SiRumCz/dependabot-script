@@ -135,12 +135,12 @@ dependencies = parser.parse
 puts "Retrieving vulnerabilities information"
 vulnerabilities = VulnerabilityFetcher.new(dependencies.map(&:name), package_manager, ENV["GITHUB_ACCESS_TOKEN"]).fetch_advisories
 
-dependencies.select(&:top_level?).each do |dep|
+dependencies.each do |dep|
+  next if vulnerabilities[dep.name.to_sym].empty? # remove it if want to have all updates
+
   #####################################
   # Build Vulnerability Fixed message #
   #####################################
-  next if vulnerabilities[dep.name.to_sym].empty?
-
   vulnerabilities_fixed = { dep.name => [] }
   vulnerabilities_fixed[dep.name] = vulnerabilities[dep.name.to_sym].map do |vuln|
     {
