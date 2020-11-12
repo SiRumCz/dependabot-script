@@ -138,34 +138,33 @@ vulnerabilities = VulnerabilityFetcher.new(dependencies.map(&:name), package_man
 dependencies.each do |dep|
   next if vulnerabilities[dep.name.to_sym].empty?
 
-  #####################################
-  # Build Vulnerability Fixed message #
-  #####################################
+  ###########################################################
+  # Build security advisory and Vulnerability Fixed message #
+  ###########################################################
+  version = Dependabot::Utils.version_class_for_package_manager(package_manager).new(dep.version)
   vulnerabilities_fixed = { dep.name => [] }
-  vulnerabilities_fixed[dep.name] = vulnerabilities[dep.name.to_sym].map do |vuln|
-    {
-      "title" => vuln[:severity] + " severity vulnerability",
-      "description" => vuln[:summary] || "",
-      "patched_versions" => vuln[:patched_versions] || [],
-      "unaffected_versions" => [],
-      "affected_versions" => vuln[:vulnerable_versions],
-      "source_url" => vuln[:url] || "https://cve.mitre.org/",
-      "source_name" => vuln[:cve_id] || "CVE security vulnerability database"
-    }
-  end
-
-  ###########################
-  # Build security advisory #
-  ###########################
-  security_vulnerabilities = vulnerabilities[dep.name.to_sym].map do |vuln|
+  security_advisories = []
+  vulnerabilities[dep.name.to_sym].each do |vuln|
     vulnerable_versions = vuln[:vulnerable_versions].map { |v| Dependabot::Utils.requirement_class_for_package_manager(package_manager).new(v) }
     safe_versions = vuln[:patched_versions].map { |v| Dependabot::Utils.requirement_class_for_package_manager(package_manager).new(v) }
-    Dependabot::SecurityAdvisory.new(
+    security_advisory = Dependabot::SecurityAdvisory.new(
       dependency_name: dep.name,
       package_manager: package_manager,
       vulnerable_versions: vulnerable_versions,
       safe_versions: safe_versions
     )
+    security_advisories.append(security_advisory)
+    vulnerabilities_fixed[dep.name].append(
+      {
+        "title" => vuln[:severity] + " severity vulnerability",
+        "description" => vuln[:summary] || "",
+        "patched_versions" => vuln[:patched_versions] || [],
+        "unaffected_versions" => [],
+        "affected_versions" => vuln[:vulnerable_versions],
+        "source_url" => vuln[:url] || "https://cve.mitre.org/",
+        "source_name" => vuln[:cve_id] || "CVE security vulnerability database"
+      }
+    ) if security_advisory.vulnerable?(version)
   end
 
   #########################################
@@ -175,7 +174,7 @@ dependencies.each do |dep|
     dependency: dep,
     dependency_files: files,
     credentials: credentials,
-    security_advisories: security_vulnerabilities
+    security_advisories: security_advisories
   )
 
   next unless checker.vulnerable? # vulnerability update only
