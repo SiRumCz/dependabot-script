@@ -136,7 +136,7 @@ puts "Retrieving vulnerabilities information"
 vulnerabilities = VulnerabilityFetcher.new(dependencies.map(&:name), package_manager, ENV["GITHUB_ACCESS_TOKEN"]).fetch_advisories
 
 dependencies.each do |dep|
-  next if vulnerabilities[dep.name.to_sym].empty? # remove it if want to have all updates
+  next if vulnerabilities[dep.name.to_sym].empty?
 
   #####################################
   # Build Vulnerability Fixed message #
@@ -178,6 +178,7 @@ dependencies.each do |dep|
     security_advisories: security_vulnerabilities
   )
 
+  next unless checker.vulnerable? # vulnerability update only
   next if checker.up_to_date?
 
   requirements_to_unlock =
@@ -218,8 +219,9 @@ dependencies.each do |dep|
     files: updated_files,
     credentials: credentials,
     assignees: [(ENV["PULL_REQUESTS_ASSIGNEE"] || ENV["GITLAB_ASSIGNEE_ID"])&.to_i],
-    label_language: true,
-    vulnerabilities_fixed: vulnerabilities_fixed
+    label_language: false,
+    rem_label: true,
+    vulnerabilities_fixed: vulnerabilities_fixed,
   )
   pull_request = pr_creator.create
   puts " submitted"
