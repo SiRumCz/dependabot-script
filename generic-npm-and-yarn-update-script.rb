@@ -218,8 +218,9 @@ dependencies.each do |dep|
     files: updated_files,
     credentials: credentials,
     assignees: [(ENV["PULL_REQUESTS_ASSIGNEE"] || ENV["GITLAB_ASSIGNEE_ID"])&.to_i],
-    label_language: false,
-    rem_label: true,
+    label_language: true,
+    rem_graph_file: files.find{ |f| f.name == 'package.json' },
+    rem_graph_api: "http://helium.cs.uvic.ca/rem/rem-highlight",
     vulnerabilities_fixed: vulnerabilities_fixed,
   )
   pull_request = pr_creator.create
