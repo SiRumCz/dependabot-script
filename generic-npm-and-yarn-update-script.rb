@@ -219,8 +219,11 @@ dependencies.each do |dep|
     credentials: credentials,
     assignees: [(ENV["PULL_REQUESTS_ASSIGNEE"] || ENV["GITLAB_ASSIGNEE_ID"])&.to_i],
     label_language: true,
-    rem_graph_file: files.find{ |f| f.name == 'package.json' },
-    rem_graph_api: "http://helium.cs.uvic.ca/rem/rem-highlight",
+    rem_graph_files: {
+      :package_json => files.find{ |f| f.name == 'package.json' }, 
+      :lockfile => files.find{ |f| f.name == 'npm-shrinkwrap.json' or f.name == 'package-lock.json' }
+    },
+    rem_graph_api: "http://helium.cs.uvic.ca/rem/rem-vulnerable-with-lockfile",
     vulnerabilities_fixed: vulnerabilities_fixed,
   )
   pull_request = pr_creator.create
