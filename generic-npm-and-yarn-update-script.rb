@@ -156,7 +156,8 @@ if (not package_json.nil?) and (not lockfile.nil?)
     lockfile: lockfile,
     package_json: package_json,
     metric: "final",
-    rem_api: "http://helium.cs.uvic.ca/rem/rem-with-lockfile-for-issue"
+    rem_api: "http://helium.cs.uvic.ca/rem/rem-with-lockfile-for-issue",
+    commit: commit
   )
   rem_issue_creator.create
   puts " ..done"
