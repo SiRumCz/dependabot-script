@@ -142,11 +142,11 @@ dependencies = parser.parse
 puts "Retrieving vulnerabilities information"
 vulnerabilities = VulnerabilityFetcher.new(dependencies.map(&:name), package_manager, ENV["GITHUB_ACCESS_TOKEN"]).fetch_advisories
 
+lockfile = files.find{ |f| f.name == 'package-lock.json' }
+package_json = files.find{ |f| f.name == 'package.json' }
 ####################################################
 # Create an Issue regard to the dependency metrics #
 ####################################################
-# lockfile = files.find{ |f| f.name == 'package-lock.json' }
-# package_json = files.find{ |f| f.name == 'package.json' }
 # if (not package_json.nil?) and (not lockfile.nil?)
 #   print "Creating Ripple-Effect of Metrics dependency graph on Issue"
 #   rem_issue_creator = Dependabot::RemIssueCreator.new(
