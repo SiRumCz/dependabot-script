@@ -145,23 +145,23 @@ vulnerabilities = VulnerabilityFetcher.new(dependencies.map(&:name), package_man
 ####################################################
 # Create an Issue regard to the dependency metrics #
 ####################################################
-lockfile = files.find{ |f| f.name == 'package-lock.json' }
-package_json = files.find{ |f| f.name == 'package.json' }
-if (not package_json.nil?) and (not lockfile.nil?)
-  print "Creating Ripple-Effect of Metrics dependency graph on Issue"
-  rem_issue_creator = Dependabot::RemIssueCreator.new(
-    source: source,
-    credentials: credentials,
-    custom_labels: ['dependency graph', 'javascript', 'rem', 'npm search metrics'],
-    lockfile: lockfile,
-    package_json: package_json,
-    metric: "final",
-    rem_api: "http://helium.cs.uvic.ca/rem/rem-with-lockfile-for-issue",
-    commit: commit
-  )
-  rem_issue_creator.create
-  puts " ..done"
-end
+# lockfile = files.find{ |f| f.name == 'package-lock.json' }
+# package_json = files.find{ |f| f.name == 'package.json' }
+# if (not package_json.nil?) and (not lockfile.nil?)
+#   print "Creating Ripple-Effect of Metrics dependency graph on Issue"
+#   rem_issue_creator = Dependabot::RemIssueCreator.new(
+#     source: source,
+#     credentials: credentials,
+#     custom_labels: ['dependency graph', 'javascript', 'rem', 'npm search metrics'],
+#     lockfile: lockfile,
+#     package_json: package_json,
+#     metric: "final",
+#     rem_api: "http://helium.cs.uvic.ca/rem/rem-with-lockfile-for-issue",
+#     commit: commit
+#   )
+#   rem_issue_creator.create
+#   puts " ..done"
+# end
 
 dependencies.each do |dep|
   next if vulnerabilities[dep.name.to_sym].empty?
