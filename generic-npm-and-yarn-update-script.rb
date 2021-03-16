@@ -253,6 +253,7 @@ dependencies.each do |dep|
     },
     rem_graph_api: "http://helium.cs.uvic.ca/rem/rem-vulnerable-with-lockfile",
     vulnerabilities_fixed: vulnerabilities_fixed,
+    branch_name_prefix: "rem-dependabot",
   )
   pull_request = pr_creator.create
   puts " submitted"
